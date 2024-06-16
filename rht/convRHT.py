@@ -61,7 +61,7 @@ def convRHT(datafn, wlen=11, smr=2, thresh=0.7, outroot="", outname="name", verb
     
     # Geometry
     datay, datax = data.shape
-    ntheta = np.int(np.ceil( np.pi*(wlen-1)/np.sqrt(2.0) ))  
+    ntheta = np.int64(np.ceil( np.pi*(wlen-1)/np.sqrt(2.0) ))
     theta, dtheta = np.linspace(0.0, np.pi, ntheta, endpoint=False, retstep=True)        
     
     # Cylinder of all lit pixels along a theta value
@@ -70,7 +70,7 @@ def convRHT(datafn, wlen=11, smr=2, thresh=0.7, outroot="", outname="name", verb
     # Store output in hdf5 cube
     out_fn = outroot+"{}_wlen{}_smr{}_thresh{}.h5".format(outname, wlen, smr, thresh)
     with h5py.File(out_fn, 'w') as f:
-        f.create_dataset(name='rht_cube', data=np.zeros((datay, datax, ntheta), np.float_), compression="gzip")
+        f.create_dataset(name='rht_cube', data=np.zeros((datay, datax, ntheta), np.float64_), compression="gzip")
         f['rht_cube'].attrs['wlen'] = wlen
         f['rht_cube'].attrs['smr'] = smr
         f['rht_cube'].attrs['thresh'] = thresh

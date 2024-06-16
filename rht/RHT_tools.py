@@ -58,11 +58,11 @@ def grid_QU_RHT(xyt_filename = "filename.fits", output_fn = "output_filename", s
     # Values of theta for RHT output
     thets = get_thets(wlen, save = False)
     
-    URHT = np.zeros((naxis2, naxis1), np.float_)
-    QRHT = np.zeros((naxis2, naxis1), np.float_)
-    URHTsq = np.zeros((naxis2, naxis1), np.float_)
-    QRHTsq = np.zeros((naxis2, naxis1), np.float_)
-    intrht = np.zeros((naxis2, naxis1), np.float_)
+    URHT = np.zeros((naxis2, naxis1), np.float64_)
+    QRHT = np.zeros((naxis2, naxis1), np.float64_)
+    URHTsq = np.zeros((naxis2, naxis1), np.float64_)
+    QRHTsq = np.zeros((naxis2, naxis1), np.float64_)
+    intrht = np.zeros((naxis2, naxis1), np.float64_)
     
     # Create dictionary of (i, j) points and their corresponding hthets array
     jipoints = zip(jpoints, ipoints)

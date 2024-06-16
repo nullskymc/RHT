@@ -404,7 +404,7 @@ def bad_pixels(data):
     # Returns an array of the same shape as data
     # NaN values MUST ALWAYS be considered bad.
     # Bad values become 1, all else become 0
-    data = np.array(data, np.float) #TODO________________________Double Check This?
+    data = np.array(data, np.float64) #TODO________________________Double Check This?
     
     # IMPLEMENTATION1: Do Comparisons which are VERY different depending on boolean choices .
     try:
@@ -449,7 +449,7 @@ def bad_pixels(data):
 
 def all_within_diameter_are_good(data, diameter):
     assert diameter%2
-    r = int(np.int(diameter/2))
+    r = int(np.int64(diameter/2))
 
     # Base case, 'assume all pixels are bad'
     mask = np.zeros_like(data)
@@ -470,8 +470,8 @@ def all_within_diameter_are_good(data, diameter):
     N = len(coords)
     for c in range(N):    
         j,i = coords[c]
-        x = (x_arr + i).astype(np.int).clip(0, datax-1)
-        y = (y_arr + j).astype(np.int).clip(0, datay-1)
+        x = (x_arr + i).astype(np.int64).clip(0, datax-1)
+        y = (y_arr + j).astype(np.int64).clip(0, datay-1)
         mask[y, x] = 0 
         update_progress((c+1)/float(N), message='Masking:', final_message='Finished Masking:') 
     '''
@@ -480,8 +480,8 @@ def all_within_diameter_are_good(data, diameter):
     coords = zip(*np.nonzero(mask))
     for c in range(len(coords)):
         j,i = coords[c]
-        x = (x_arr + i).astype(np.int).clip(0, datax-1)
-        y = (y_arr + j).astype(np.int).clip(0, datay-1)
+        x = (x_arr + i).astype(np.int64).clip(0, datax-1)
+        y = (y_arr + j).astype(np.int64).clip(0, datay-1)
         mask[j][i] = np.logical_not(np.any(bad_pixels( data[y, x] )))
         update_progress((c+1)/float(N), message='Masking:', final_message='Finished Masking:') 
     '''
@@ -522,7 +522,7 @@ def getMask(data, smr=SMR, wlen=WLEN):
     
     # Cuts away smr radius from bads, then wlen from bads 
     smr_mask = all_within_diameter_are_good(data, 2*smr+1)
-    nans = np.empty(data.shape, dtype=np.float).fill(np.nan)
+    nans = np.empty(data.shape, dtype=np.float64).fill(np.nan)
     wlen_mask = all_within_diameter_are_good( np.where(smr_mask, data, 
         nans), wlen)
     return smr_mask, wlen_mask
@@ -534,7 +534,7 @@ def circ_kern(diameter):
     r = diameter//2 #int(np.floor(diameter/2))
     mnvals = np.indices((diameter, diameter)) - r
     rads = np.hypot(mnvals[0], mnvals[1])
-    return np.less_equal(rads, r).astype(np.int)
+    return np.less_equal(rads, r).astype(np.int64)
 
 # Unsharp mask. Returns binary data.
 def umask(data, radius, smr_mask=None):
@@ -568,7 +568,7 @@ def fast_hough(in_arr, xyt):
     
     '''
     if hout == None:
-        return np.einsum('ijk,ij', xyt, in_arr) #, dtype=np.int) 
+        return np.einsum('ijk,ij', xyt, in_arr) #, dtype=np.int64) 
     else:
         assert hout.ndim == 1
         assert hout.shape[0] == xyt.shape[2]
@@ -579,15 +579,15 @@ def fast_hough(in_arr, xyt):
     # cube = np.repeat(in_arr[:,:,np.newaxis], repeats=ntheta, axis=2)*xyt
      
     # IMPLEMENTATION2: Broadcast 2D array against 3D stack and multiply (FAST)
-    # cube = np.multiply( in_arr.reshape((in_arr.shape[0],in_arr.shape[1],1)), xyt).astype(np.float, copy=False)
+    # cube = np.multiply( in_arr.reshape((in_arr.shape[0],in_arr.shape[1],1)), xyt).astype(np.float64, copy=False)
 
     # IMPLEMENTATION3: Broadcast 2D array against 3D stack and AND them together (VERY FAST)
     # assert in_arr.dtype == np.bool_ 
     # assert xyt.dtype == np.bool_  
     # cube = np.logical_and( in_arr.reshape((in_arr.shape[0],in_arr.shape[1],1)), xyt)
         
-    # return np.sum(np.sum( cube , axis=0, dtype=np.int), axis=0, dtype=np.float) #WORKS FAST AND DIVIDES PROPERLY
-    # return np.sum(cube, axis=(1,0), dtype=np.int)
+    # return np.sum(np.sum( cube , axis=0, dtype=np.int64), axis=0, dtype=np.float64) #WORKS FAST AND DIVIDES PROPERLY
+    # return np.sum(cube, axis=(1,0), dtype=np.int64)
 
 def houghnew(image, cos_theta, sin_theta):
     assert image.ndim == 2 
@@ -603,7 +603,7 @@ def houghnew(image, cos_theta, sin_theta):
     nr_bins = np.ceil(np.hypot(*image.shape))
 
     # Allocate the output data.
-    out = np.zeros((int(nr_bins), len(cos_theta)), dtype=np.int)
+    out = np.zeros((int(nr_bins), len(cos_theta)), dtype=np.int64)
 
     # Find the indices of the non-zero values in the input data.
     y, x = np.nonzero(image)
@@ -619,7 +619,7 @@ def houghnew(image, cos_theta, sin_theta):
         shifted = np.round(distances) + nr_bins/2
 
         # Cast the shifted values to ints to use as indices
-        indices = shifted.astype(np.int)
+        indices = shifted.astype(np.int64)
         
         # Use bin count to accumulate the HT coefficients
         bincount = np.bincount(indices) 
@@ -627,7 +627,7 @@ def houghnew(image, cos_theta, sin_theta):
         # Assign the proper values to the out array
         out[:len(bincount), i] = bincount
 
-    return out[np.int(nr_bins/2), :]
+    return out[np.int64(nr_bins/2), :]
 
 
 def all_thetas(wlen, theta, original):
@@ -648,7 +648,7 @@ def all_thetas(wlen, theta, original):
     ntheta = len(theta)
     
     #outshape = (wlen, wlen, ntheta)
-    out = np.zeros(window.shape+(ntheta,), np.int)
+    out = np.zeros(window.shape+(ntheta,), np.int64)
     coords = list(zip( *np.nonzero(window)))
     for (j, i) in coords:
         # At each x/y value, create new single-pixel data.
@@ -1028,8 +1028,8 @@ def interpret(filepath, force=False, wlen=WLEN, frac=FRAC, smr=SMR, original=ORI
 
     # Load in relevant files and data
     data = getData(filepath)
-    backproj = np.load(backproj_filename).astype(np.float)
-    spectrum = np.load(spectrum_filename).astype(np.float)
+    backproj = np.load(backproj_filename).astype(np.float64)
+    spectrum = np.load(spectrum_filename).astype(np.float64)
     hi, hj, hthets = getXYT(xyt_filename)
 
     # Gather parameters from that data
@@ -1041,7 +1041,7 @@ def interpret(filepath, force=False, wlen=WLEN, frac=FRAC, smr=SMR, original=ORI
     log = np.log(np.where( np.isfinite(data), data, np.ones_like( data) ))
     U = np.zeros_like(hi)
     V = np.zeros_like(hj)
-    C = np.zeros((len(U)), dtype=np.float)
+    C = np.zeros((len(U)), dtype=np.float64)
     coords = list(zip(hi, hj))
     for c in range(len(coords)):
         C[c], U[c], V[c] = theta_rht(hthets[c], original, uv=True)
